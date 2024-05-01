@@ -1,6 +1,8 @@
 
 
 
+
+
 import numpy as np 
 import matplotlib.pyplot as plt 
 def GaussianQuadrature(f,a,b): 
