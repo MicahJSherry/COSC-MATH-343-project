@@ -1,6 +1,7 @@
+"""
+Quadrature methods
 
-
-
+"""
 
 
 import numpy as np 
