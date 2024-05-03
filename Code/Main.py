@@ -15,12 +15,24 @@ def function_Circleizer(f):
     return C
 
 
-xpts = [1, 2, 3, 4]
+tpts = [1, 2, 3, 4]
 fpts = [0, 3, 7, 8]
-coefs = get_spline_coef(xpts,fpts)
-print(spline(1, coefs ,xpts))
+coefs = get_spline_coef(tpts,fpts)
 
-print(type(function_Circleizer(f)))
+xpts = np.linspace(tpts[0],tpts[-1])
+ypts = []
+for x in xpts:
+    ypts.append(spline(x,coefs, tpts))
+plt.plot(tpts,fpts, "*")
+plt.plot(xpts,ypts, "k")
+plt.show()
+
+def f1(x):
+    return spline(x,coefs, tpts)
+function_Circleizer(f1)
+
+V3 = integrate(function_Circleizer(f1),0,4, 9)
+print(V3)
 
 V2 = integrate(function_Circleizer(f),0,1, 9)
 V1 = integrate(function_Circleizer(g),0,1, 9) 
