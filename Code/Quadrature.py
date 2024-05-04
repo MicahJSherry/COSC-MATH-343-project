@@ -18,9 +18,10 @@ def GaussianQuadrature(f,a,b):
         def map(x):
             # derived from the point-slope form of a line
             return slope * (x+1) + a
-        area = 0
+        area = 0.0
         for i in range(len(w)):
             area += slope*w[i] * f(map(x[i]))
+        #print(type(area))
         return area
 
 def integrate(f,A,B, numInt=10):
@@ -32,9 +33,12 @@ def integrate(f,A,B, numInt=10):
     if (numInt<1): 
         raise ValueError("Cannot have a number of intervals less than 1")
     
-    x_points= np.linspace(A,B,numInt+1)
+    x_points = np.linspace(A,B,numInt+1)
+    
     #print(x_points)
-    area = 0
+    area = 0.0
     for i in range(len(x_points)-1):
         area += GaussianQuadrature(f,x_points[i],x_points[i+1])
+    
+    
     return area
