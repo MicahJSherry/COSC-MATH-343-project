@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import imageio
+import tempfile
 
 def get_interpolated_points(spline, num_pts=50):
     t_pts = np.linspace(spline.t_pts[0], spline.t_pts[-1], num=num_pts)
@@ -24,8 +26,9 @@ def plot_interpolation(spline1, spline2=None, num_pts=50):
 
     plt.title("Cubic spline interpolation")
     plt.legend()
-    plt.show()
     plt.savefig("interpolation")
+
+    plt.close()
 
 def get_3d_points(spline, num_pts=50):
     a, b = spline.t_pts[0], spline.t_pts[-1]
@@ -62,7 +65,7 @@ def get_3d_points(spline, num_pts=50):
 
     return X, Y, Z
 
-def plot_surfaces(spline1, spline2=None, num_pts=50, incl_washer=True):
+def plot_surfaces(spline1, spline2=None, num_pts=50, incl_washer=True, make_gif=False, elevation_angle=20, rotation_degress=10, fps=10):
     X1, Y1, Z1 = get_3d_points(spline1, num_pts=num_pts)
     X2, Y2, Z2 = None, None, None
     if spline2 is not None:
@@ -72,28 +75,40 @@ def plot_surfaces(spline1, spline2=None, num_pts=50, incl_washer=True):
     ax = fig.add_subplot(111, projection="3d")
     ax.plot_surface(X1, Y1, Z1, alpha=0.3, color="red", label="Spline 1")
     if spline2 is not None:
-        ax.plot_surface(X2, Y2, Z2, alpha=0.6, color="green", label="Spline 2")
-        
+        ax.plot_surface(X2, Y2, Z2, alpha=0.6, color="blue", label="Spline 2")
+
     if incl_washer:
         # we assume spline1 is the outer surface and spline2 the inner
         # and plot the washer just at its midpoint
-        x = spline1.t_pts[-1]
+        x = (spline1.t_pts[0]+spline1.t_pts[-1])/2.0
         all_thetas = np.linspace(0, 2*np.pi, num=num_pts)
         y_outer = spline1.interpolate(x)*np.cos(all_thetas)
         z_outer = spline1.interpolate(x)*np.sin(all_thetas)
-        ax.plot(x*np.ones_like(all_thetas), y_outer, z_outer, alpha=0.85, color="blue", label="Washer")
+        ax.plot(x*np.ones_like(all_thetas), y_outer, z_outer, alpha=0.85, color="green", label="Washer")
         if spline2:
             y_inner = spline2.interpolate(x)*np.cos(all_thetas)
             z_inner = spline2.interpolate(x)*np.sin(all_thetas)
-            ax.plot(x*np.ones_like(all_thetas), y_inner, z_inner, alpha=0.85, color="blue")
+            ax.plot(x*np.ones_like(all_thetas), y_inner, z_inner, alpha=0.85, color="green")
             for i in range(len(all_thetas)):
-                ax.plot([x,x], [y_inner[i],y_outer[i]], [z_inner[i],z_outer[i]], alpha=0.85, color="blue")
+                ax.plot([x,x], [y_inner[i],y_outer[i]], [z_inner[i],z_outer[i]], alpha=0.85, color="green")
 
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
+
     plt.title("Surfaces of revolution")
     plt.legend()
-
-    plt.show()
     plt.savefig("surface")
+
+    if make_gif:
+        with tempfile.TemporaryDirectory() as temp_gif_frames:
+            frames = []
+            for angle in range(0, 360, rotation_degress):
+                ax.view_init(elevation_angle, angle)
+                filename = f"{temp_gif_frames}/frame_{angle}.png"
+                plt.savefig(filename)
+                frames.append(imageio.imread(filename))
+
+            imageio.mimsave("surface_rotation.gif", frames, "GIF", fps=fps)
+
+    plt.close()
