@@ -62,7 +62,7 @@ def get_3d_points(spline, num_pts=50):
 
     return X, Y, Z
 
-def plot_surfaces(spline1, spline2=None, num_pts=50):
+def plot_surfaces(spline1, spline2=None, num_pts=50, incl_washer=True):
     X1, Y1, Z1 = get_3d_points(spline1, num_pts=num_pts)
     X2, Y2, Z2 = None, None, None
     if spline2 is not None:
@@ -70,9 +70,24 @@ def plot_surfaces(spline1, spline2=None, num_pts=50):
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-    ax.plot_surface(X1, Y1, Z1, alpha=0.3, color="red", label="spline 1")
+    ax.plot_surface(X1, Y1, Z1, alpha=0.3, color="red", label="Spline 1")
     if spline2 is not None:
-        ax.plot_surface(X2, Y2, Z2, alpha=0.6, color="green", label="spline 2")
+        ax.plot_surface(X2, Y2, Z2, alpha=0.6, color="green", label="Spline 2")
+        
+    if incl_washer:
+        # we assume spline1 is the outer surface and spline2 the inner
+        # and plot the washer just at its midpoint
+        x = spline1.t_pts[-1]
+        all_thetas = np.linspace(0, 2*np.pi, num=num_pts)
+        y_outer = spline1.interpolate(x)*np.cos(all_thetas)
+        z_outer = spline1.interpolate(x)*np.sin(all_thetas)
+        ax.plot(x*np.ones_like(all_thetas), y_outer, z_outer, alpha=0.85, color="blue", label="Washer")
+        if spline2:
+            y_inner = spline2.interpolate(x)*np.cos(all_thetas)
+            z_inner = spline2.interpolate(x)*np.sin(all_thetas)
+            ax.plot(x*np.ones_like(all_thetas), y_inner, z_inner, alpha=0.85, color="blue")
+            for i in range(len(all_thetas)):
+                ax.plot([x,x], [y_inner[i],y_outer[i]], [z_inner[i],z_outer[i]], alpha=0.85, color="blue")
 
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
@@ -82,4 +97,3 @@ def plot_surfaces(spline1, spline2=None, num_pts=50):
 
     plt.show()
     plt.savefig("surface")
-
