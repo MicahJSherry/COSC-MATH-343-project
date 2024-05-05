@@ -8,24 +8,31 @@ def function_Circleizer(f):
         return np.pi * f(x)**2
     return C
 
-tpts = [0, 1, 2, 3, 4]
-fpts = [0, 2, 4, 6, 8]
-test_spline = spline(tpts,fpts)
-xpts = np.linspace(tpts[0],tpts[-1])
+def sample(f,x0, xn, numPoints):
+    """ returns 2 lists of x points and y points sampled from a given function """
+    xpts = np.linspace(x0,xn, numPoints)
+    ypts = f(xpts)
+    return xpts, ypts
+
+def f(x):
+    return np.sin(x) +2
+
+
+
+tpts, fpts = sample(f,0,np.pi * 2,5)
+
+s = spline(tpts,fpts)
+
+xpts = np.linspace(0,2*np.pi)
 ypts = []
-
 for x in xpts:
-    ypts.append(test_spline.spline(x))
-plt.plot(tpts,fpts,"*")
-plt.plot(xpts,ypts,"k")
+    ypts.append(s.spline(x))
+
+plt.plot(xpts,ypts)
 plt.show()
-def f1(x):
-    return test_spline.spline(x)
-function_Circleizer(f1)
 
 
-
-V3 = integrate(function_Circleizer(f1),tpts[0],tpts[-1], 10)
+V3 = integrate(function_Circleizer(s.spline),xpts[0],xpts[-1], 10)
 print("V3 =",V3, type(V3))
 
 
