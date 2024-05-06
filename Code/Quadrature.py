@@ -39,14 +39,14 @@ def integrate(f, a, b, num_subints=10):
     
     return area
 
-def grid_refinement(f, a, b, num_subints=1, refinement_factor=2, max_iters=10):
+
+def grid_refinement(f, a, b, refinement_factor=2, max_iters=5):
     areas = {} 
 
     for i in range(max_iters):
+        num_subints = refinement_factor**i
         areas[num_subints] = integrate(f, a, b, num_subints=num_subints)
-
-        num_subints += refinement_factor**i
-
+        print(num_subints)
     return areas
 
 def calc_errors(areas, true_integral):
@@ -61,8 +61,9 @@ def calc_alphas(errors, refinement_factor):
     alphas = []
 
     raw_errors = list(errors.values())
-
+    
     for i in range(len(raw_errors)-1):
+
         alphas.append(np.log(raw_errors[i]/raw_errors[i+1])/np.log(refinement_factor))
 
     return alphas
