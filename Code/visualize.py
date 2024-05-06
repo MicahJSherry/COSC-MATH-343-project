@@ -113,3 +113,19 @@ def plot_surfaces(spline1, spline2=None, num_pts=50, incl_washer=True, make_gif=
             imageio.mimsave("surface_rotation.gif", frames, "GIF", fps=fps)
 
     plt.close()
+
+def plot_errors(errors, x_scale="log", y_scale="linear"):
+    subints = list(errors.keys())
+    raw_errors = list(errors.values())
+
+    plt.plot(subints, raw_errors, marker=".", color="red")
+    for i in range(len(subints)):
+        plt.text(subints[i]+.001, raw_errors[i]+.01, subints[i])
+    plt.xscale(x_scale)
+    plt.yscale(y_scale)
+    plt.title("Errors over Subintervals")
+    plt.savefig("error_plot")
+
+    plt.close()
+
+
