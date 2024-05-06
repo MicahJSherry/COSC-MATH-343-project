@@ -17,8 +17,6 @@ def sample(f,x0, xn, numPoints):
 def f(x):
     return np.sin(x) +2
 
-
-
 tpts, fpts = sample(f,0,np.pi * 2,5)
 
 s = spline(tpts,fpts)
