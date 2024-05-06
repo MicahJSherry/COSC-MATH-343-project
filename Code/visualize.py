@@ -4,25 +4,25 @@ import imageio
 import tempfile
 
 def get_interpolated_points(spline, num_pts=50):
-    t_pts = np.linspace(spline.t_pts[0], spline.t_pts[-1], num=num_pts)
-    y_pts = []
+    tpts = np.linspace(spline.tpts[0], spline.tpts[-1], num=num_pts)
+    ypts = []
 
-    for t in t_pts:
-        y_pts.append(spline.interpolate(t))
+    for t in tpts:
+        ypts.append(spline.spline(t))
 
-    return t_pts, y_pts
+    return tpts, ypts
 
 def plot_interpolation(spline1, spline2=None, num_pts=50):
-    t_pts_s1, y_pts_s1 = get_interpolated_points(spline1, num_pts=num_pts)
-    t_pts_s2, y_pts_s2 = None, None
+    tpts_s1, ypts_s1 = get_interpolated_points(spline1, num_pts=num_pts)
+    tpts_s2, ypts_s2 = None, None
     if spline2 is not None:
-        t_pts_s2, y_pts_s2 = get_interpolated_points(spline2, num_pts=num_pts)
+        tpts_s2, ypts_s2 = get_interpolated_points(spline2, num_pts=num_pts)
 
-    plt.plot(t_pts_s1, y_pts_s1, ".", color="red", markersize=4, label="Interpolated Points (spline 1)")
-    plt.plot(spline1.t_pts, spline1.y_pts, "o", color="green", markersize=7, label="Given Points (spline 1)")
+    plt.plot(tpts_s1, ypts_s1, ".", color="red", markersize=4, label="Interpolated Points (spline 1)")
+    plt.plot(spline1.tpts, spline1.ypts, "o", color="green", markersize=7, label="Given Points (spline 1)")
     if spline2 is not None:
-        plt.plot(t_pts_s2, y_pts_s2, ".", color="blue", markersize=4, label="Interpolated Points (spline 2)")
-        plt.plot(spline2.t_pts, spline2.y_pts, "o", color="yellow", markersize=7, label="Given Points (spline 2)")
+        plt.plot(tpts_s2, ypts_s2, ".", color="blue", markersize=4, label="Interpolated Points (spline 2)")
+        plt.plot(spline2.tpts, spline2.ypts, "o", color="yellow", markersize=7, label="Given Points (spline 2)")
 
     plt.title("Cubic spline interpolation")
     plt.legend()
@@ -31,7 +31,7 @@ def plot_interpolation(spline1, spline2=None, num_pts=50):
     plt.close()
 
 def get_3d_points(spline, num_pts=50):
-    a, b = spline.t_pts[0], spline.t_pts[-1]
+    a, b = spline.tpts[0], spline.tpts[-1]
     all_x = np.linspace(a, b, num=num_pts)
     all_theta = np.linspace(0, 2*np.pi, num=num_pts)
 
@@ -42,7 +42,7 @@ def get_3d_points(spline, num_pts=50):
     Y, Z = [], []
 
     for i in range(len(X)):
-        y_pts, z_pts = [], []
+        ypts, z_pts = [], []
 
         # array of floats
         x_pts = X[i]
@@ -54,10 +54,10 @@ def get_3d_points(spline, num_pts=50):
             x = x_pts[j]
             theta = thetas[j]
 
-            y_pts.append(spline.interpolate(x)*np.cos(theta))
-            z_pts.append(spline.interpolate(x)*np.sin(theta))
+            ypts.append(spline.spline(x)*np.cos(theta))
+            z_pts.append(spline.spline(x)*np.sin(theta))
 
-        Y.append(y_pts)
+        Y.append(ypts)
         Z.append(z_pts)
 
     Y = np.array(Y)
@@ -80,14 +80,15 @@ def plot_surfaces(spline1, spline2=None, num_pts=50, incl_washer=True, make_gif=
     if incl_washer:
         # we assume spline1 is the outer surface and spline2 the inner
         # and plot the washer just at its midpoint
-        x = (spline1.t_pts[0]+spline1.t_pts[-1])/2.0
+        x = (spline1.tpts[0]+spline1.tpts[-1])/2.0
         all_thetas = np.linspace(0, 2*np.pi, num=num_pts)
-        y_outer = spline1.interpolate(x)*np.cos(all_thetas)
-        z_outer = spline1.interpolate(x)*np.sin(all_thetas)
+        y_outer = spline1.spline(x)*np.cos(all_thetas)
+        z_outer = spline1.spline(x)*np.sin(all_thetas)
         ax.plot(x*np.ones_like(all_thetas), y_outer, z_outer, alpha=0.85, color="green", label="Washer")
-        if spline2:
-            y_inner = spline2.interpolate(x)*np.cos(all_thetas)
-            z_inner = spline2.interpolate(x)*np.sin(all_thetas)
+
+        if spline2 is not None:
+            y_inner = spline2.spline(x)*np.cos(all_thetas)
+            z_inner = spline2.spline(x)*np.sin(all_thetas)
             ax.plot(x*np.ones_like(all_thetas), y_inner, z_inner, alpha=0.85, color="green")
             for i in range(len(all_thetas)):
                 ax.plot([x,x], [y_inner[i],y_outer[i]], [z_inner[i],z_outer[i]], alpha=0.85, color="green")
